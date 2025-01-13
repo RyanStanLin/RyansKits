@@ -27,9 +27,9 @@ namespace BarkerSharper.Model
         public string Title { get; set; }
 
         [JsonProperty("device_key")]
-        public string DeviceKey { get; set; }
+        public string DeviceKey { get;set; }
 
-        public void Validate()
+        public virtual void Validate()
         {
             if (string.IsNullOrWhiteSpace(Body)) throw new ArgumentNullException(nameof(Body), "Body is required.");
             if (string.IsNullOrWhiteSpace(Title)) throw new ArgumentNullException(nameof(Title), "Title is required.");
@@ -40,7 +40,8 @@ namespace BarkerSharper.Model
     public partial class BarkNotificationExtendedModel : BarkNotificationBaseModel, IValidatable
     {
         [JsonProperty("level", NullValueHandling = NullValueHandling.Ignore)]
-        public NotificationLevel Level { get; set; }
+        [JsonConverter(typeof(NotificationLevelConverter))]
+        public NotificationLevel? Level { get; set; }
 
         [JsonProperty("badge", NullValueHandling = NullValueHandling.Ignore)]
         public long? Badge { get; set; }
@@ -52,7 +53,8 @@ namespace BarkerSharper.Model
         public string Copy { get; set; }
 
         [JsonProperty("sound", NullValueHandling = NullValueHandling.Ignore)]
-        public NotificationSound Sound { get; set; }
+        [JsonConverter(typeof(NotificationSoundConverter))]
+        public NotificationSound? Sound { get; set; }
 
         [JsonProperty("call", NullValueHandling = NullValueHandling.Ignore)]
         public long? Call { get; set; }
@@ -75,22 +77,25 @@ namespace BarkerSharper.Model
         [JsonProperty("url", NullValueHandling = NullValueHandling.Ignore)]
         public string Url { get; set; }
         
-        public new void Validate()
+        public override void Validate()
         {
             base.Validate();
             if (Badge is not null and < 0) throw new ArgumentOutOfRangeException(nameof(Badge), "Badge can not be less than 0.");
             if (Volume is not null and < 0 or >10) throw new ArgumentOutOfRangeException(nameof(Volume), $"Volume({Volume}) can not be less than 0 or greater than 10.");
         }
-    }
 
-    public partial class BarkNotificationExtendedModel
-    {
-        public static BarkNotificationExtendedModel FromJson(string json) => JsonConvert.DeserializeObject<BarkNotificationExtendedModel>(json, BarkerSharper.Model.BarkNotificationPostModelConverter.Settings);
+        public static new T FromJson<T>(string json) where T : BarkNotificationBaseModel
+        {
+            return JsonConvert.DeserializeObject<T>(json, BarkNotificationPostModelConverter.Settings);
+        }
     }
 
     public static class BarkNotificationPostModelSerialize
     {
-        public static string ToJson(this BarkNotificationExtendedModel self) => JsonConvert.SerializeObject(self, BarkerSharper.Model.BarkNotificationPostModelConverter.Settings);
+        public static string ToJson<T>(this T self) where T : BarkNotificationBaseModel
+        {
+            return JsonConvert.SerializeObject(self, BarkNotificationPostModelConverter.Settings);
+        }
     }
 
     internal static class BarkNotificationPostModelConverter

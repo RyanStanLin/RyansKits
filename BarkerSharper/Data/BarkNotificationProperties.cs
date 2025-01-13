@@ -3,6 +3,8 @@ using SharpExtensionKit;
 
 namespace BarkerSharper.Data;
 
+/*
+[Obsolete]
 public class BarkNotificationBasicProperties
 {
     [Description("title")] 
@@ -11,6 +13,7 @@ public class BarkNotificationBasicProperties
     public string Body { get; set; }
 }
 
+[Obsolete]
 public class BarkNotificationOptionalProperties
 {
     private int? _volume;
@@ -138,9 +141,11 @@ public class BarkNotificationOptionalProperties
         };
     }
 }
+*/
 
 public enum NotificationLevel
 {
+    [Description("critical")] Critical,
     [Description("active")] Active,
     [Description("timeSensitive")] TimeSensitive,
     [Description("passive")] Passive
